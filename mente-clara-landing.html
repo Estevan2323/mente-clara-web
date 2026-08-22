@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mente Clara — Bloquea lo que te distrae</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7EAE6;
+    --paper-soft:#DEE2DB;
+    --ink:#14181B;
+    --muted:#5B6268;
+    --signal:#FF5A36;
+    --signal-dim:#E24E2C;
+    --clear:#1F8F6B;
+    --line: rgba(20,24,27,0.14);
+    --radius: 4px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Lora', serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Space Grotesk', sans-serif;
+    letter-spacing:-0.01em;
+    line-height:1.05;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:inherit;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+  @media (max-width:640px){.wrap{padding:0 20px;}}
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(231,234,230,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk';font-weight:700;font-size:1.05rem;}
+  .logo-mark{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--ink);
+    position:relative;
+    flex-shrink:0;
+  }
+  .logo-mark::after{
+    content:'';
+    position:absolute; inset:6px;
+    border-radius:50%;
+    background:var(--signal);
+  }
+  .nav-links{display:flex;gap:32px;font-family:'Space Grotesk';font-size:0.88rem;font-weight:500;}
+  .nav-links a{text-decoration:none;color:var(--muted);transition:color .15s;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{
+    font-family:'Space Grotesk';font-weight:600;font-size:0.85rem;
+    background:var(--ink);color:var(--paper);
+    padding:9px 18px;border-radius:var(--radius);
+    text-decoration:none;
+  }
+  @media (max-width:720px){.nav-links{display:none;}}
+
+  /* HERO */
+  header.hero{padding:88px 0 40px;}
+  .eyebrow{
+    font-family:'JetBrains Mono';font-size:0.78rem;color:var(--signal);
+    text-transform:uppercase;letter-spacing:0.12em;margin-bottom:20px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:'●';font-size:0.6rem;}
+  .hero h1{
+    font-size:clamp(2.2rem, 5.2vw, 3.8rem);
+    font-weight:700;max-width:14ch;
+    margin-bottom:24px;
+  }
+  .hero h1 em{font-style:normal;color:var(--signal);}
+  .hero p.sub{
+    font-size:1.15rem;color:var(--muted);max-width:46ch;margin-bottom:36px;
+  }
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:64px;}
+  .btn-primary, .btn-secondary{
+    font-family:'Space Grotesk';font-weight:600;font-size:0.95rem;
+    padding:14px 26px;border-radius:var(--radius);text-decoration:none;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--ink);color:var(--paper);}
+  .btn-primary:hover{transform:translateY(-2px);background:#000;}
+  .btn-secondary{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn-secondary:hover{border-color:var(--ink);}
+
+  /* SIGNATURE: static -> signal bar */
+  .signal-strip{
+    display:flex;align-items:flex-end;gap:3px;height:64px;
+    margin-bottom:14px;
+  }
+  .signal-strip .bar{flex:1;background:var(--muted);opacity:0.35;border-radius:1px;}
+  .signal-strip .bar.clear{background:var(--clear);opacity:1;}
+  .signal-caption{
+    display:flex;justify-content:space-between;font-family:'JetBrains Mono';
+    font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;
+  }
+
+  /* Live demo card */
+  .demo-card{
+    margin-top:56px;
+    background:var(--ink);color:var(--paper);
+    border-radius:10px;padding:32px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:24px;flex-wrap:wrap;
+  }
+  .demo-left{max-width:340px;}
+  .demo-left .label{font-family:'JetBrains Mono';font-size:0.75rem;color:#9AA3A8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+  .demo-left p{color:#C7CDD0;font-size:0.95rem;}
+  .timer{
+    font-family:'JetBrains Mono';font-weight:600;font-size:3.2rem;
+    color:var(--signal);letter-spacing:0.02em;
+  }
+  .timer-tag{font-family:'JetBrains Mono';font-size:0.75rem;color:#9AA3A8;text-align:right;margin-top:6px;}
+
+  /* PROBLEM */
+  section.problem{padding:80px 0;border-top:1px solid var(--line);}
+  .problem .wrap{display:grid;grid-template-columns:1fr 1.3fr;gap:56px;align-items:start;}
+  @media (max-width:800px){.problem .wrap{grid-template-columns:1fr;}}
+  .problem h2{font-size:1.9rem;margin-bottom:8px;}
+  .stat-big{font-family:'JetBrains Mono';font-weight:600;font-size:3.4rem;color:var(--signal);line-height:1;}
+  .stat-label{color:var(--muted);font-size:0.95rem;margin-top:8px;}
+  .problem-copy p{color:var(--muted);font-size:1.05rem;margin-bottom:16px;}
+  .problem-copy strong{color:var(--ink);}
+
+  /* HOW IT WORKS */
+  section.how{padding:80px 0;background:var(--paper-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .section-head{margin-bottom:48px;max-width:56ch;}
+  .section-head .eyebrow{color:var(--clear);}
+  .section-head h2{font-size:1.9rem;}
+  .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  @media (max-width:800px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{background:var(--paper-soft);padding:32px 28px;}
+  .mode-card .tag{font-family:'JetBrains Mono';font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;}
+  .mode-card h3{font-size:1.25rem;margin-bottom:10px;}
+  .mode-card p{color:var(--muted);font-size:0.95rem;}
+
+  /* FEATURES */
+  section.features{padding:80px 0;}
+  .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 32px;}
+  @media (max-width:800px){.feature-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){.feature-grid{grid-template-columns:1fr;}}
+  .feature{border-top:2px solid var(--ink);padding-top:16px;}
+  .feature h3{font-size:1.05rem;margin-bottom:8px;}
+  .feature p{color:var(--muted);font-size:0.92rem;}
+
+  /* PREMIUM */
+  section.premium{background:var(--ink);color:var(--paper);padding:80px 0;}
+  .premium .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+  @media (max-width:800px){.premium .wrap{grid-template-columns:1fr;}}
+  .premium h2{font-size:2rem;margin-bottom:16px;}
+  .premium p.lead{color:#B9C0C4;font-size:1.02rem;margin-bottom:0;}
+  .perk-list{list-style:none;}
+  .perk-list li{
+    display:flex;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.12);
+    font-family:'Space Grotesk';font-size:0.98rem;
+  }
+  .perk-list li:last-child{border-bottom:none;}
+  .perk-list .mark{color:var(--signal);font-weight:700;}
+
+  /* CTA FINAL */
+  section.cta-final{padding:96px 0;text-align:center;}
+  .cta-final h2{font-size:clamp(1.8rem,4vw,2.6rem);max-width:20ch;margin:0 auto 28px;}
+  .cta-final .btn-primary{padding:16px 32px;font-size:1rem;}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--line);padding:36px 0;}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  footer .foot-left{font-family:'Space Grotesk';font-weight:600;font-size:0.9rem;}
+  footer .foot-links{display:flex;gap:22px;font-family:'JetBrains Mono';font-size:0.8rem;color:var(--muted);}
+  footer .foot-links a{text-decoration:none;}
+  footer .foot-links a:hover{color:var(--ink);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo"><span class="logo-mark"></span>MENTE CLARA</div>
+    <div class="nav-links">
+      <a href="#problema">El problema</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#funciones">Funciones</a>
+    </div>
+    <a class="nav-cta" href="#descargar">Descargar</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">App de enfoque · Android</div>
+    <h1>No te pido que tengas <em>disciplina</em>.<br>Te la doy bloqueando lo que te distrae.</h1>
+    <p class="sub">Mente Clara bloquea las apps que te roban horas, te pone límites reales y te ayuda a construir una racha de enfoque día tras día. Sin fuerza de voluntad de más.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#descargar">Descargar en Google Play →</a>
+      <a class="btn-secondary" href="#como-funciona">Ver cómo funciona</a>
+    </div>
+
+    <div class="signal-strip" aria-hidden="true">
+      <div class="bar" style="height:38%"></div>
+      <div class="bar" style="height:71%"></div>
+      <div class="bar" style="height:22%"></div>
+      <div class="bar" style="height:55%"></div>
+      <div class="bar" style="height:80%"></div>
+      <div class="bar" style="height:30%"></div>
+      <div class="bar" style="height:64%"></div>
+      <div class="bar" style="height:45%"></div>
+      <div class="bar clear" style="height:50%"></div>
+      <div class="bar clear" style="height:50%"></div>
+      <div class="bar clear" style="height:50%"></div>
+      <div class="bar clear" style="height:50%"></div>
+      <div class="bar clear" style="height:50%"></div>
+      <div class="bar clear" style="height:50%"></div>
+    </div>
+    <div class="signal-caption">
+      <span>Ruido / distracción</span>
+      <span>Señal / enfoque</span>
+    </div>
+
+    <div class="demo-card">
+      <div class="demo-left">
+        <div class="label">Modo Enfoque en vivo</div>
+        <p>Así se ve un bloque de trabajo real dentro de la app: cuenta regresiva, apps bloqueadas, cero notificaciones.</p>
+      </div>
+      <div>
+        <div class="timer" id="timer">25:00</div>
+        <div class="timer-tag">bloqueo activo</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="problem" id="problema">
+  <div class="wrap">
+    <div>
+      <div class="stat-big">90+</div>
+      <div class="stat-label">veces al día se estima que revisamos el celular, casi siempre sin decidirlo de forma consciente.</div>
+    </div>
+    <div class="problem-copy">
+      <h2>El problema no es tu disciplina.</h2>
+      <p>Las apps que más usas están diseñadas por equipos completos para que no las sueltes. <strong>Competir contra eso con "fuerza de voluntad" es una pelea perdida.</strong></p>
+      <p>Mente Clara no te da otro consejo de productividad. Te quita la opción de distraerte mientras trabajas o estudias — y te muestra, con datos reales, en qué se te va el tiempo.</p>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Cómo funciona</div>
+      <h2>Tres formas de recuperar tu tiempo</h2>
+    </div>
+    <div class="mode-grid">
+      <div class="mode-card">
+        <div class="tag">Modo Enfoque</div>
+        <h3>Bloques tipo Pomodoro</h3>
+        <p>Define un bloque de trabajo y las apps que distraen quedan bloqueadas hasta que termine el tiempo. Ideal para sesiones de estudio o trabajo profundo.</p>
+      </div>
+      <div class="mode-card">
+        <div class="tag">Modo Productivo</div>
+        <h3>Bloqueo persistente</h3>
+        <p>Activa un bloqueo de fondo durante todo tu horario de estudio o trabajo, sin tener que iniciar sesiones manuales una y otra vez.</p>
+      </div>
+      <div class="mode-card">
+        <div class="tag">Límite diario</div>
+        <h3>30 minutos, y ya</h3>
+        <p>Pon un tope acumulado a tus apps más distractoras. Al llegar al límite, la app se bloquea el resto del día. Sin excepciones de último minuto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="funciones">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Funciones</div>
+      <h2>Todo lo que necesitas, nada de lo que sobra</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>Bloqueo por app</h3>
+        <p>Elige exactamente qué apps quieres restringir. Tú decides qué cuenta como distracción.</p>
+      </div>
+      <div class="feature">
+        <h3>Pantallas de fricción</h3>
+        <p>Antes de entrar a una app bloqueada, una pantalla de espera te da un momento para reconsiderarlo.</p>
+      </div>
+      <div class="feature">
+        <h3>Racha diaria</h3>
+        <p>Cada día que cumples tu meta de enfoque suma a tu racha. Verla crecer es parte de la motivación.</p>
+      </div>
+      <div class="feature">
+        <h3>Estadísticas reales</h3>
+        <p>Tiempo bloqueado, intentos de entrar a apps restringidas y progreso semanal, todo con datos reales.</p>
+      </div>
+      <div class="feature">
+        <h3>Modo mañana</h3>
+        <p>Programa un bloqueo automático para tus primeras horas del día, antes de que el scroll se adueñe de tu mañana.</p>
+      </div>
+      <div class="feature">
+        <h3>Frase del día</h3>
+        <p>Un recordatorio corto cada día para mantener la cabeza en foco, no en modo distracción.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="premium">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow" style="color:var(--signal)">Mente Clara Premium</div>
+      <h2>Para cuando ya no quieres negociar contigo mismo</h2>
+      <p class="lead">Todo lo esencial es gratis. Premium quita los límites para quienes quieren ir un paso más allá.</p>
+    </div>
+    <ul class="perk-list">
+      <li><span class="mark">＋</span> Bloqueo ilimitado de apps, sin restricciones de plan gratuito</li>
+      <li><span class="mark">＋</span> Protector de racha: un día libre no te hace perder el progreso</li>
+      <li><span class="mark">＋</span> Experiencia sin anuncios, de principio a fin</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta-final" id="descargar">
+  <div class="wrap">
+    <h2>Tu enfoque no debería depender de tu fuerza de voluntad.</h2>
+    <a class="btn-primary" href="#" title="Reemplaza este enlace con el de tu ficha en Google Play">Descargar Mente Clara — gratis</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-left">MENTE CLARA</div>
+    <div class="foot-links">
+      <a href="https://instagram.com/estvnn23" target="_blank" rel="noopener">@estvnn23</a>
+      <span>© 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Demo countdown visual — puramente ilustrativo, en loop.
+  (function(){
+    var total = 25 * 60;
+    var el = document.getElementById('timer');
+    var t = total;
+    function render(){
+      var m = Math.floor(t/60), s = t%60;
+      el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+    render();
+    setInterval(function(){
+      t -= 1;
+      if(t < 0) t = total;
+      render();
+    }, 1000);
+  })();
+</script>
+
+</body>
+</html>
