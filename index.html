@@ -76,6 +76,16 @@
     .reveal, .reveal-stagger > *{opacity:1;transform:none;transition:none;}
   }
 
+  /* Aparición palabra por palabra en títulos clave */
+  .word-piece{
+    display:inline-block;opacity:0;transform:translateY(0.4em);filter:blur(3px);
+    transition:opacity .5s ease, transform .5s ease, filter .5s ease;
+  }
+  .word-reveal.in-view .word-piece{opacity:1;transform:translateY(0);filter:blur(0);}
+  @media (prefers-reduced-motion: reduce){
+    .word-piece{opacity:1;transform:none;filter:none;transition:none;}
+  }
+
   /* NAV */
   nav{position:sticky;top:0;z-index:50;background:rgba(10,7,16,0.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--card-line);}
   nav .wrap{display:flex;align-items:center;justify-content:space-between;height:70px;}
@@ -94,15 +104,16 @@
   /* HERO */
   header.hero{padding:80px 0 30px;position:relative;overflow:hidden;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
-  .hero-inner > div:first-child > *{opacity:0;animation:fadeUp .8s ease forwards;}
+  .hero-inner .eyebrow,.hero-inner p.sub,.hero-inner .hero-ctas{opacity:0;animation:fadeUp .8s ease forwards;}
   .hero-inner .eyebrow{animation-delay:.05s;}
-  .hero-inner h1{animation-delay:.15s;}
-  .hero-inner p.sub{animation-delay:.28s;}
-  .hero-inner .hero-ctas{animation-delay:.4s;}
+  .hero-inner h1{opacity:1;}
+  .hero-inner p.sub{animation-delay:.55s;}
+  .hero-inner .hero-ctas{animation-delay:.7s;}
   .timer-card{opacity:0;animation:fadeUp .8s ease .3s forwards;}
   @media (prefers-reduced-motion: reduce){
-    .hero-inner > div:first-child > *, .timer-card{animation:none;opacity:1;}
+    .hero-inner .eyebrow,.hero-inner p.sub,.hero-inner .hero-ctas,.timer-card{animation:none;opacity:1;}
   }
+
   .glow-1{width:420px;height:420px;background:var(--violet);top:-160px;left:-120px;}
   .glow-2{width:360px;height:360px;background:var(--pink);top:60px;right:-140px;opacity:0.22;}
   .hero-inner{display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;position:relative;z-index:1;}
@@ -290,7 +301,7 @@
   <div class="wrap hero-inner">
     <div>
       <div class="eyebrow">App de enfoque · Android</div>
-      <h1>No te pido que tengas <span class="grad-text">disciplina</span>, te la doy bloqueando lo que te distrae</h1>
+      <h1 data-word-reveal="load">No te pido que tengas <span class="grad-text">disciplina</span>, te la doy bloqueando lo que te distrae</h1>
       <p class="sub">Mente Clara bloquea las apps que te roban horas, te pone un límite real de uso y convierte tus hábitos en una racha que da gusto mantener viva.</p>
       <div class="hero-ctas">
         <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.estevan.menteclaraapp" target="_blank" rel="noopener">Descargar en Google Play</a>
@@ -334,7 +345,7 @@
       <div class="stat-label">veces al día se estima que revisamos el celular, casi siempre sin haberlo decidido</div>
     </div>
     <div class="problem-copy">
-      <h2>El problema nunca fue tu disciplina</h2>
+      <h2 data-word-reveal="scroll">El problema nunca fue tu disciplina</h2>
       <p>Las apps que más usas están diseñadas por equipos enteros para que no las sueltes, así que competir contra eso a puro esfuerzo de voluntad es una pelea que empieza perdida. <strong>Mente Clara no te da otro consejo de productividad</strong>, simplemente te quita la opción de distraerte mientras trabajas o estudias, y te muestra con datos reales en qué se te va el tiempo.</p>
     </div>
   </div>
@@ -437,7 +448,7 @@
   <div class="wrap reveal-stagger">
     <div>
       <div class="eyebrow" style="color:#FFD966;">Mente Clara Premium</div>
-      <h2>Para cuando ya no quieres negociar contigo mismo</h2>
+      <h2 data-word-reveal="scroll">Para cuando ya no quieres negociar contigo mismo</h2>
       <p class="lead">Todo lo esencial es gratis, y Premium simplemente quita los límites para quienes quieren ir un paso más allá.</p>
     </div>
     <ul class="perk-list">
@@ -450,7 +461,7 @@
 
 <section class="cta-final" id="descargar">
   <div class="wrap reveal">
-    <h2>Tu enfoque no debería depender de tu fuerza de voluntad</h2>
+    <h2 data-word-reveal="scroll">Tu enfoque no debería depender de tu fuerza de voluntad</h2>
     <a class="btn-primary" href="https://play.google.com/store/apps/details?id=com.estevan.menteclaraapp" target="_blank" rel="noopener">Descargar Mente Clara — gratis</a>
   </div>
 </section>
@@ -466,6 +477,67 @@
 </footer>
 
 <script>
+  // ---------- Aparición de texto palabra por palabra ----------
+  function splitIntoWords(el){
+    var index = 0;
+    var frag = document.createDocumentFragment();
+    Array.prototype.forEach.call(Array.prototype.slice.call(el.childNodes), function(node){
+      if(node.nodeType === Node.TEXT_NODE){
+        var parts = node.textContent.split(/(\s+)/);
+        parts.forEach(function(part){
+          if(part.trim() === ''){
+            frag.appendChild(document.createTextNode(part));
+          } else {
+            var span = document.createElement('span');
+            span.className = 'word-piece';
+            span.textContent = part;
+            span.style.transitionDelay = (index * 0.04) + 's';
+            index++;
+            frag.appendChild(span);
+          }
+        });
+      } else {
+        node.classList.add('word-piece');
+        node.style.transitionDelay = (index * 0.04) + 's';
+        index++;
+        frag.appendChild(node);
+      }
+    });
+    el.innerHTML = '';
+    el.appendChild(frag);
+    el.classList.add('word-reveal');
+  }
+
+  (function(){
+    var loadTargets = document.querySelectorAll('[data-word-reveal="load"]');
+    var scrollTargets = document.querySelectorAll('[data-word-reveal="scroll"]');
+
+    loadTargets.forEach(function(el){ splitIntoWords(el); });
+    scrollTargets.forEach(function(el){ splitIntoWords(el); });
+
+    window.requestAnimationFrame(function(){
+      setTimeout(function(){
+        loadTargets.forEach(function(el){ el.classList.add('in-view'); });
+      }, 250);
+    });
+
+    if(scrollTargets.length){
+      if(!('IntersectionObserver' in window)){
+        scrollTargets.forEach(function(el){ el.classList.add('in-view'); });
+      } else {
+        var wordIo = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              entry.target.classList.add('in-view');
+              wordIo.unobserve(entry.target);
+            }
+          });
+        }, {threshold:0.4, rootMargin:'0px 0px -30px 0px'});
+        scrollTargets.forEach(function(el){ wordIo.observe(el); });
+      }
+    }
+  })();
+
   // ---------- Animaciones al hacer scroll ----------
   (function(){
     var targets = document.querySelectorAll('.reveal, .reveal-stagger');
