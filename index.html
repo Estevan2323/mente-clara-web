@@ -250,8 +250,18 @@
   @media (max-width:520px){.feature-grid{grid-template-columns:1fr;}}
   .feature{background:var(--card);border:1px solid var(--card-line);border-radius:var(--radius);padding:26px;transition:transform .25s ease, border-color .25s ease;}
   .feature:hover{transform:translateY(-6px);border-color:rgba(255,92,138,0.4);}
-  .feature .ico{font-size:1.4rem;margin-bottom:14px;display:inline-block;transition:transform .3s ease;}
-  .feature:hover .ico{transform:scale(1.2) rotate(6deg);}
+  .feature .ico{font-size:1.4rem;margin-bottom:14px;display:inline-block;transition:transform .3s ease;animation:iconBob 3.2s ease-in-out infinite;}
+  .feature:hover .ico{animation-play-state:paused;transform:scale(1.2) rotate(6deg);}
+  .feature:nth-child(1) .ico{animation-delay:0s;}
+  .feature:nth-child(2) .ico{animation-delay:.3s;}
+  .feature:nth-child(3) .ico{animation-delay:.6s;}
+  .feature:nth-child(4) .ico{animation-delay:.9s;}
+  .feature:nth-child(5) .ico{animation-delay:1.2s;}
+  .feature:nth-child(6) .ico{animation-delay:1.5s;}
+  @keyframes iconBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  @media (prefers-reduced-motion: reduce){
+    .feature .ico{animation:none;}
+  }
   .feature h3{font-size:1.02rem;margin-bottom:8px;font-family:'Baloo 2';}
   .feature p{color:var(--muted);font-size:0.92rem;}
 
@@ -341,7 +351,7 @@
 <section class="problem" id="problema">
   <div class="wrap reveal-stagger">
     <div>
-      <div class="stat-big grad-text">90+</div>
+      <div class="stat-big grad-text" data-count-to="90" data-count-suffix="+">0</div>
       <div class="stat-label">veces al día se estima que revisamos el celular, casi siempre sin haberlo decidido</div>
     </div>
     <div class="problem-copy">
@@ -355,7 +365,7 @@
   <div class="wrap">
     <div class="section-head reveal">
       <div class="eyebrow">Así se ve por dentro</div>
-      <h2>La app, en acción</h2>
+      <h2 data-word-reveal="scroll">La app, en acción</h2>
       <p>Cuatro vistazos rápidos a lo que encuentras al abrir Mente Clara todos los días.</p>
     </div>
     <div class="tabs reveal">
@@ -381,7 +391,7 @@
   <div class="wrap">
     <div class="section-head reveal">
       <div class="eyebrow">Cómo funciona</div>
-      <h2>Tres formas de recuperar tu tiempo</h2>
+      <h2 data-word-reveal="scroll">Tres formas de recuperar tu tiempo</h2>
     </div>
     <div class="mode-grid reveal-stagger">
       <div class="mode-card">
@@ -406,7 +416,7 @@
 <section class="habit-demo">
   <div class="wrap demo-grid reveal-stagger">
     <div class="demo-copy">
-      <h2>Ver tu progreso te hace querer seguir</h2>
+      <h2 data-word-reveal="scroll">Ver tu progreso te hace querer seguir</h2>
       <p>Cada hábito que marcas suma a tu racha y a tu porcentaje del día, así que abrir la app se vuelve una razón para seguir en lugar de una obligación. Prueba el widget de abajo tal como se siente dentro de Mente Clara.</p>
     </div>
     <div class="habit-widget">
@@ -430,7 +440,7 @@
   <div class="wrap">
     <div class="section-head reveal">
       <div class="eyebrow">Funciones</div>
-      <h2>Todo lo que necesitas, nada de lo que sobra</h2>
+      <h2 data-word-reveal="scroll">Todo lo que necesitas, nada de lo que sobra</h2>
     </div>
     <div class="feature-grid reveal-stagger">
       <div class="feature"><div class="ico">🎯</div><h3>Bloqueo por app</h3><p>Eliges exactamente qué apps quieres restringir, así que tú decides qué cuenta como distracción y qué no.</p></div>
@@ -536,6 +546,59 @@
         scrollTargets.forEach(function(el){ wordIo.observe(el); });
       }
     }
+  })();
+
+  // ---------- Parallax sutil de los glows con el scroll ----------
+  (function(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var glows = document.querySelectorAll('.glow');
+    var ticking = false;
+    window.addEventListener('scroll', function(){
+      if(!ticking){
+        window.requestAnimationFrame(function(){
+          var y = window.scrollY;
+          glows.forEach(function(g, i){
+            var speed = (i % 2 === 0) ? 0.06 : -0.05;
+            g.style.marginTop = (y * speed) + 'px';
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, {passive:true});
+  })();
+
+  // ---------- Contador animado para cifras destacadas ----------
+  (function(){
+    var counters = document.querySelectorAll('[data-count-to]');
+    if(!counters.length) return;
+    function animateCount(el){
+      var target = parseInt(el.dataset.countTo, 10);
+      var suffix = el.dataset.countSuffix || '';
+      var duration = 1400;
+      var startTime = null;
+      function step(ts){
+        if(!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target) + suffix;
+        if(progress < 1) window.requestAnimationFrame(step);
+      }
+      window.requestAnimationFrame(step);
+    }
+    if(!('IntersectionObserver' in window)){
+      counters.forEach(function(el){ el.textContent = el.dataset.countTo + (el.dataset.countSuffix||''); });
+      return;
+    }
+    var countIo = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          animateCount(entry.target);
+          countIo.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.6});
+    counters.forEach(function(el){ countIo.observe(el); });
   })();
 
   // ---------- Animaciones al hacer scroll ----------
